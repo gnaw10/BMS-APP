@@ -48,9 +48,15 @@ public class BookAdapter extends BaseAdapter {
         ((TextView)v.findViewById(R.id.textTitle)).setText("--"+book.getId()+"--  "+book.getName());
 
         if(book.getUser_id() == 0)
+        {
             ((TextView)v.findViewById(R.id.textUser)).setText("可借");
+            ((TextView)v.findViewById(R.id.borrowButton)).setEnabled(true);
+        }
         else
+        {
             ((TextView)v.findViewById(R.id.textUser)).setText("不可借,在"+book.getBorrowUser()+"处");
+            ((TextView)v.findViewById(R.id.borrowButton)).setEnabled(false);
+        }
 
         ((TextView)v.findViewById(R.id.textState)).setText(book.getCoverUrl());
         return v;
