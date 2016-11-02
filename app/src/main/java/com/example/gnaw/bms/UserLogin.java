@@ -25,7 +25,6 @@ import java.util.Scanner;
 
 public class UserLogin extends Activity {
 
-
     private Button signButton = null;
     private User user = new User();
     private static String result;
@@ -34,7 +33,6 @@ public class UserLogin extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.userlogin);
         signButton=(Button)findViewById(R.id.signButton);
-
 
         // 创建一个新线程，用外部处理程序初始化，便于将线程的数据送回
         final MyThread thread = new MyThread(handler);

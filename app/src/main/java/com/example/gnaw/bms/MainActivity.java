@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -40,12 +41,14 @@ public class MainActivity extends Activity {
     private TextView textView;
     private static final String TAG = "MainActivity";
     public static Handler mMainHandler, mChildHandler;
-    private Button bookButton, button;
-    private ListView listView;
-    private List<Book> books = new ArrayList<Book>();
+    private Button bookButton, button,logListButton;
+    private ListView listView,logListView;
     private Book book = new Book();
     public static Intent intent = new Intent();
     public  BookAdapter bookAdapter;
+    public LogListAdapter logListAdapter;
+    private  List<Book> books = new ArrayList<Book>();
+    private  List<LogList> logLists = new ArrayList<LogList>();
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -58,6 +61,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         bookAdapter= new BookAdapter(this, books);
+        logListAdapter = new LogListAdapter(this,logLists);
         LayoutInflater mInflater;
         mInflater = (LayoutInflater) this.getSystemService(LAYOUT_INFLATER_SERVICE);
 
@@ -65,17 +69,19 @@ public class MainActivity extends Activity {
         bookButton = (Button) view1.findViewById(R.id.bookButton);
         listView = (ListView) view1.findViewById(R.id.listView);
 
+        final View view2 = mInflater.inflate(R.layout.layout2, null);
+        logListButton = (Button) view2.findViewById(R.id.logListButton);
+        logListView = (ListView) view2.findViewById(R.id.logListView);
 
-        final List<Book> books = new ArrayList<Book>();
-        books.add(book);
 
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         tabLayout = (TabLayout) findViewById(R.id.tabLayout);
         LayoutInflater inflater = getLayoutInflater();
         //view1 = inflater.inflate(R.layout.layout1, null);
-        view2 = inflater.inflate(R.layout.layout2, null);
+        //view2 = inflater.inflate(R.layout.layout2, null);
         view3 = inflater.inflate(R.layout.layout3, null);
         button = (Button) view3.findViewById(R.id.button);
+
         textView = (TextView) view3.findViewById(R.id.textView5);
         // 将要分页显示的View装入数组中
         viewList.add(view1);
@@ -112,8 +118,8 @@ public class MainActivity extends Activity {
         };
 
         bookAdapter.notifyDataSetChanged();
-
         viewPager.setAdapter(pagerAdapter);
+
 
         pagerAdapter.notifyDataSetChanged();
         tabLayout.setupWithViewPager(viewPager);
@@ -129,9 +135,10 @@ public class MainActivity extends Activity {
         bookButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                    new MyThread(bookHandler).start();
+                    new BookThread(bookHandler).start();
             }
         });
+
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -141,7 +148,40 @@ public class MainActivity extends Activity {
             }
         });
 
+        logListButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new LogListThread(logListHandler).start();
+            }
+        });
+
     }
+
+    Handler logListHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            // 接收消息里面的包中的String数据
+            String string = msg.getData().getString("key");
+            // 将线程中的得到的数据显示
+            try
+            {
+                LogListRequest logRequest = new LogListRequest();
+                Log.i("qwerqwer",LogListThread.result);
+                logRequest = JSON.parseObject(LogListThread.result, LogListRequest.class);
+                logLists.clear();
+                List<LogList> tempLogs = logRequest.getResponse();
+                logLists.addAll(tempLogs);
+                logListAdapter.notifyDataSetChanged();
+                logListView.setAdapter(logListAdapter);
+                Log.e(TAG, "asdadrfaweoiru");
+            }
+            catch (Exception e)
+            {
+                Log.i("12",e.toString());
+            }
+        }
+    };
 
     Handler bookHandler = new Handler() {
         @Override
@@ -153,8 +193,8 @@ public class MainActivity extends Activity {
             try
             {
                 Request request = new Request();
-                Log.i("qwerqwer",MyThread.result);
-                request = JSON.parseObject(MyThread.result, Request.class);
+                Log.i("qwerqwer",BookThread.result);
+                request = JSON.parseObject(BookThread.result, Request.class);
                 books.clear();
                 bookAdapter.notifyDataSetChanged();
                 List<Book> tempBooks = request.getResponse();
@@ -169,7 +209,6 @@ public class MainActivity extends Activity {
             }
         }
     };
-
 
     public Handler handler = new  Handler();
     @Override
@@ -278,6 +317,59 @@ public class MainActivity extends Activity {
                 ((TextView)v.findViewById(R.id.borrowButton)).setEnabled(false);
             }
             ((TextView)v.findViewById(R.id.textState)).setText(book.getCoverUrl());
+            return v;
+        }
+    }
+
+    public class LogListAdapter extends BaseAdapter {
+        private List<LogList> logLists;
+        private LayoutInflater mInflater;
+        LogListAdapter(Context context, List<LogList> logLists)
+        {
+            this.logLists = logLists;
+            mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        }
+        @Override
+        public int getCount() {
+            return logLists.size();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return books.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(final int position, View convertView, ViewGroup parent) {
+            final int num = position;
+            final LogList logList = logLists.get(position);
+            View v = convertView;
+            if(convertView == null)
+            {
+                v = mInflater.inflate(R.layout.loglist , parent , false);
+            }
+            v.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent singleLogIntent = new Intent(MainActivity.this,SingleLog.class);
+                    Bundle singleLogBundle = new Bundle();
+                    singleLogBundle.putString("logListTitle",logLists.get(position+1).getTitle());
+                    singleLogBundle.putString("logListBody",logLists.get(position+1).getBody());
+                    singleLogIntent.putExtras(singleLogBundle);
+                    startActivity(singleLogIntent);
+                }
+            });
+            ((TextView)v.findViewById(R.id.logListTitle)).setText("--"+logList.getId()+"--  "+logList.getTitle());
+            ((TextView)v.findViewById(R.id.logListBody)).setText(logList.getBody());
+            ((TextView)v.findViewById(R.id.logListUser)).setText("作者:"+logList.getUser_id());
+            ((TextView)v.findViewById(R.id.logListBook)).setText("相关书籍:"+logList.getBook_id());
+            ((TextView)v.findViewById(R.id.logListBody)).setText(logList.getBody());
+
             return v;
         }
     }

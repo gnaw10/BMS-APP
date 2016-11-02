@@ -6,7 +6,7 @@ import java.util.List;
  * Created by gnaw on 2016/11/1.
  */
 
-public class LogRequest {
+public class LogListRequest {
     private String code;
     private List<LogList> response;
 

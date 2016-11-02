@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:weightSum="1">
+
+    <TextView
+        android:text="TextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:typeface ="monospace"
+        android:layout_marginTop="20dp"
+        android:layout_gravity="center_horizontal"
+        android:id="@+id/singleLogTitle"
+        android:layout_weight="0.27" />
+
+    <TextView
+        android:text="TextView"
+        android:layout_width="259dp"
+        android:layout_height="322dp"
+        android:layout_gravity="center_vertical|center_horizontal"
+        android:id="@+id/singleLogBody"
+        android:layout_weight="0.58" />
+
+</LinearLayout>

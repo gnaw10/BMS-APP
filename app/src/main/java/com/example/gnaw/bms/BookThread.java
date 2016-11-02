@@ -12,14 +12,15 @@ import java.net.URL;
 import java.util.Scanner;
 
 /**
- * Created by gnaw on 2016/11/1.
+ * Created by gnaw on 2016/11/2.
  */
-public class MyThread extends Thread {
+
+public class BookThread extends Thread {
     private Handler handler = null;
     public static   String para,result;
     private static final String CHILD_TAG = "ChildThread";
     // 初始化线程
-    protected MyThread(Handler handler) {
+    protected BookThread(Handler handler) {
         this.handler = handler;
     }
 

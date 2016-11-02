@@ -20,6 +20,8 @@
         </activity>
         <activity android:name=".BorrowBook">
         </activity>
+        <activity android:name=".SingleLog">
+        </activity>
     </application>
 
 </manifest>
