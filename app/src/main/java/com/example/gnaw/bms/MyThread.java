@@ -1,5 +1,6 @@
 package com.example.gnaw.bms;
 
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -11,16 +12,21 @@ import java.net.URL;
 import java.util.Scanner;
 
 /**
- * Created by gnaw on 2016/10/29.
+ * Created by gnaw on 2016/11/1.
  */
-public class ChildThread extends Thread {
-
+public class MyThread extends Thread {
+    private Handler handler = null;
+    public static   String para,result;
     private static final String CHILD_TAG = "ChildThread";
-    private String result;
-    public void run() {
-        this.setName("ChildThread");
+    // 初始化线程
+    protected MyThread(Handler handler) {
+        this.handler = handler;
+    }
 
-        //初始化消息循环队列，需要在Handler创建之前
+    @Override
+    // 线程的start()执行时自动调用此函数
+    public void run() {
+        //super.run();
         Looper.prepare();
         HttpURLConnection conn = null;
         try {
@@ -60,34 +66,22 @@ public class ChildThread extends Thread {
             }
         }
 
+        // …………
+        // 执行子线程里实现的功能
+        // …………
 
-        MainActivity.mChildHandler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                Log.i(CHILD_TAG, "Got an incoming message from the main thread - " + (String)msg.obj);
-
-                try {
-                    //在子线程中可以做一些耗时的工作
-                    sleep(100);
-
-                    Message toMain = MainActivity.mMainHandler.obtainMessage();
-                    toMain.obj = result;
-
-                    MainActivity.mMainHandler.sendMessage(toMain);
-
-                    Log.i(CHILD_TAG, "Send a message to the main thread - " + (String)toMain.obj);
-
-                } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
-
-        };
-
-        Log.i(CHILD_TAG, "Child handler is bound to - "+ MainActivity.mChildHandler.getLooper().getThread().getName());
-
-        //启动子线程消息循环队列
-        Looper.loop();
+        // 线程中产生的数据，可以是任何类型的值，此处用String类型作为例子
+        String string = para;
+        // 定义消息，之后发送出去
+        Message msg = handler.obtainMessage();
+        // 定义数据包，数据包里可以put不同类型的数据
+        Bundle bundle = new Bundle();
+        // 将String数据放入包中
+        bundle.putString("key", string);
+        // 将包放入消息中
+        msg.setData(bundle);
+        // 将消息发送出去
+        handler.sendMessage(msg);
+        Log.i("123","456");
     }
 }

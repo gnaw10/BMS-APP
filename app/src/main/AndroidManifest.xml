@@ -18,6 +18,8 @@
         </activity>
         <activity android:name=".UserLogin">
         </activity>
+        <activity android:name=".BorrowBook">
+        </activity>
     </application>
 
 </manifest>

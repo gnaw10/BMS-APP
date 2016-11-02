@@ -1,9 +1,11 @@
 package com.example.gnaw.bms;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.PagerAdapter;
@@ -12,15 +14,21 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 
 public class MainActivity extends Activity {
@@ -37,6 +45,7 @@ public class MainActivity extends Activity {
     private List<Book> books = new ArrayList<Book>();
     private Book book = new Book();
     public static Intent intent = new Intent();
+    public  BookAdapter bookAdapter;
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -47,6 +56,8 @@ public class MainActivity extends Activity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        bookAdapter= new BookAdapter(this, books);
         LayoutInflater mInflater;
         mInflater = (LayoutInflater) this.getSystemService(LAYOUT_INFLATER_SERVICE);
 
@@ -57,7 +68,6 @@ public class MainActivity extends Activity {
 
         final List<Book> books = new ArrayList<Book>();
         books.add(book);
-        final BookAdapter bookAdapter = new BookAdapter(this, books);
 
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         tabLayout = (TabLayout) findViewById(R.id.tabLayout);
@@ -101,7 +111,6 @@ public class MainActivity extends Activity {
             }
         };
 
-        books.add(book);
         bookAdapter.notifyDataSetChanged();
 
         viewPager.setAdapter(pagerAdapter);
@@ -116,21 +125,36 @@ public class MainActivity extends Activity {
         //pagerAdapter.notifyDataSetChanged();
         //tabLayout.setupWithViewPager(viewPager);
 
-        mMainHandler = new Handler() {
+
+        bookButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void handleMessage(Message msg) {
-                Log.i(TAG, "s" + (String) msg.obj);
-                // 接收子线程的消息
-                System.out.println("0.0.0.0" + (String) msg.obj);
-                //info.setText((String) msg.obj);
-                Log.i(TAG, (String) msg.obj);
-                Request request = JSON.parseObject((String) msg.obj, Request.class);
-                Log.i(TAG, request.toString());
+            public void onClick(View v) {
+                    new MyThread(bookHandler).start();
+            }
+        });
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //button.setVisibility(View.GONE);
+                intent = new Intent(MainActivity.this, UserLogin.class);
+                startActivityForResult(intent, 1);
+            }
+        });
 
-                System.out.println(JSON.parseObject((String) msg.obj, Request.class));
-                //
-                request = JSON.parseObject((String) msg.obj, Request.class);
+    }
 
+    Handler bookHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            // 接收消息里面的包中的String数据
+            String string = msg.getData().getString("key");
+            // 将线程中的得到的数据显示
+            try
+            {
+                Request request = new Request();
+                Log.i("qwerqwer",MyThread.result);
+                request = JSON.parseObject(MyThread.result, Request.class);
                 books.clear();
                 bookAdapter.notifyDataSetChanged();
                 List<Book> tempBooks = request.getResponse();
@@ -139,46 +163,31 @@ public class MainActivity extends Activity {
                 listView.setAdapter(bookAdapter);
                 Log.e(TAG, "asdadrfaweoiru");
             }
-        };
-
-
-        new ChildThread().start();
-        bookButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mChildHandler != null) {
-                    //发送消息给子线程
-                    Message childMsg = mChildHandler.obtainMessage();
-                    childMsg.obj = mMainHandler.getLooper().getThread().getName();
-                    mChildHandler.sendMessage(childMsg);
-                    Log.i(TAG, (String) childMsg.obj);
-                }
+            catch (Exception e)
+            {
+                Log.i("12",e.toString());
             }
-        });
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //button.setVisibility(View.GONE);
-
-                intent = new Intent(MainActivity.this, UserLogin.class);
-                startActivityForResult(intent, 1);
+        }
+    };
 
 
-            }
-        });
-
-    }
-
+    public Handler handler = new  Handler();
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        String loginResult="00";
+        String loginResult="1",borrowResult="2";
+        Log.i(TAG,"/"+resultCode+"/"+requestCode);
+        if(requestCode == 1)
         switch (resultCode) {
             case RESULT_OK:
                 try {
                     loginResult = data.getStringExtra("loginResult");
                     textView.setText(loginResult);
-                    Toast.makeText(this, loginResult, Toast.LENGTH_SHORT).show();
-                    button.setVisibility(View.INVISIBLE);
+                    System. out.println("--------"+loginResult);
+                    if(JSON.parseObject(loginResult).getString("code") .equals("0000"))
+                        Toast.makeText(this, loginResult, Toast.LENGTH_SHORT).show();
+                    else
+                        Toast.makeText(this, "登录失败"+loginResult, Toast.LENGTH_SHORT).show();
+                    //button.setVisibility(View.INVISIBLE);
                 } catch (Exception e) {
                     textView.setText("登录失败"+e.toString());
                 }
@@ -186,14 +195,93 @@ public class MainActivity extends Activity {
             default:
                 break;
         }
+        else if(requestCode == 2)
+            switch (resultCode) {
+                case RESULT_OK:
+                    try {
+                        borrowResult = data.getStringExtra("borrowResult");
+                        //textView.setText(borrowResult);
+                        Log.i(TAG,"123"+borrowResult);
+                        String code = JSON.parseObject(borrowResult).getString("code");
+                        Log.i(TAG,"456"+code);
+                        if(code.equals("0000"))
+                            Toast.makeText(this, borrowResult+"借阅成功", Toast.LENGTH_SHORT).show();
+                        else
+                            Toast.makeText(this, borrowResult+"借阅失败", Toast.LENGTH_SHORT).show();
+
+                        //button.setVisibility(View.INVISIBLE);
+                    } catch (Exception e) {
+                        //textView.setText("登录失败"+e.toString());
+                        Toast.makeText(this, borrowResult+"借阅失败", Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+                default:
+                    break;
+            }
+
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    public void onDestroy() {
-        super.onDestroy();
-        Log.i(TAG, "Stop looping the child thread's message queue");
-        mChildHandler.getLooper().quit();
+    public class BookAdapter extends BaseAdapter {
+        private List<Book> books;
+        private LayoutInflater mInflater;
+        BookAdapter(Context context, List<Book> books)
+        {
+            this.books = books;
+            mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        }
+        @Override
+        public int getCount() {
+            return books.size();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return books.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(final int position, View convertView, ViewGroup parent) {
+            final int num = position;
+            Book book = books.get(position);
+            View v = convertView;
+            if(convertView == null)
+            {
+                v = mInflater.inflate(R.layout.book , parent , false);
+            }
+            ((TextView)v.findViewById(R.id.textTitle)).setText("--"+book.getId()+"--  "+book.getName());
+
+            if(book.getUser_id() == 0)
+            {
+                ((TextView)v.findViewById(R.id.textUser)).setText("可借");
+                ((TextView)v.findViewById(R.id.borrowButton)).setEnabled(true);
+                ((TextView)v.findViewById(R.id.borrowButton)).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent borrowIntent = new Intent(MainActivity.this,BorrowBook.class);
+                        Bundle bookBundle;//该类用作携带数据
+                        bookBundle = new Bundle();
+                        bookBundle.putInt("id", (position+1));
+                        borrowIntent.putExtras(bookBundle);
+                        startActivityForResult(borrowIntent,2);
+                    }
+                });
+            }
+            else
+            {
+                ((TextView)v.findViewById(R.id.textUser)).setText("不可借,在"+book.getBorrowUser()+"处");
+                ((TextView)v.findViewById(R.id.borrowButton)).setEnabled(false);
+            }
+            ((TextView)v.findViewById(R.id.textState)).setText(book.getCoverUrl());
+            return v;
+        }
     }
+
 
 }
 
