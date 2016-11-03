@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,6 +25,7 @@ import android.widget.Toast;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
+import java.io.File;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -41,7 +43,7 @@ public class MainActivity extends Activity {
     private TextView textView;
     private static final String TAG = "MainActivity";
     public static Handler mMainHandler, mChildHandler;
-    private Button bookButton, button,logListButton;
+    private Button bookButton, button,logListButton,newLogListButton;
     private ListView listView,logListView;
     private Book book = new Book();
     public static Intent intent = new Intent();
@@ -49,6 +51,9 @@ public class MainActivity extends Activity {
     public LogListAdapter logListAdapter;
     private  List<Book> books = new ArrayList<Book>();
     private  List<LogList> logLists = new ArrayList<LogList>();
+    public static String ApiToken,username;
+    public static int bookNum,nowUserId = 0;
+    private EditText editUsername,editBookNum;
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -73,16 +78,29 @@ public class MainActivity extends Activity {
         logListButton = (Button) view2.findViewById(R.id.logListButton);
         logListView = (ListView) view2.findViewById(R.id.logListView);
 
-
+        final View view3 = mInflater.inflate(R.layout.layout3, null);
+        editBookNum = (EditText) view3.findViewById(R.id.editBookNum);
+        editUsername = (EditText) view3.findViewById(R.id.editUsername);
+        editBookNum.setText("0");
+        editBookNum.setEnabled(false);
+        editUsername.setEnabled(false);
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         tabLayout = (TabLayout) findViewById(R.id.tabLayout);
+        newLogListButton = (Button)view2.findViewById(R.id.newLogListButton);
+
         LayoutInflater inflater = getLayoutInflater();
         //view1 = inflater.inflate(R.layout.layout1, null);
         //view2 = inflater.inflate(R.layout.layout2, null);
-        view3 = inflater.inflate(R.layout.layout3, null);
+        //view3 = inflater.inflate(R.layout.layout3, null);
         button = (Button) view3.findViewById(R.id.button);
 
-        textView = (TextView) view3.findViewById(R.id.textView5);
+        ApiToken = FileCacheUtil.getCache(MainActivity.this,"user.txt");
+        if(ApiToken.length()>9)
+            MainActivity.nowUserId =Integer.parseInt(ApiToken.substring(ApiToken.lastIndexOf("-")+1,ApiToken.length()));
+        Log.i("%%%%%%%%%",ApiToken);
+        new BookThread(bookHandler).start();    //加载图书
+        new LogListThread(logListHandler).start();  //加载书评
+        new UserThread(userHandler).start();
         // 将要分页显示的View装入数组中
         viewList.add(view1);
         viewList.add(view2);
@@ -131,6 +149,13 @@ public class MainActivity extends Activity {
         //pagerAdapter.notifyDataSetChanged();
         //tabLayout.setupWithViewPager(viewPager);
 
+        newLogListButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent newLogListIntent =  new Intent(MainActivity.this,NewLogList.class);
+                startActivity(newLogListIntent);
+            }
+        });
 
         bookButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -210,6 +235,30 @@ public class MainActivity extends Activity {
         }
     };
 
+    Handler userHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            // 接收消息里面的包中的String数据
+            String string = msg.getData().getString("key");
+            // 将线程中的得到的数据显示
+            try
+            {
+
+                editUsername.setText(username);
+                editBookNum.setText(Integer.toString(bookNum));
+                editBookNum.setEnabled(false);
+                editUsername.setEnabled(false);
+
+
+            }
+            catch (Exception e)
+            {
+
+            }
+        }
+    };
+
     public Handler handler = new  Handler();
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -220,15 +269,25 @@ public class MainActivity extends Activity {
             case RESULT_OK:
                 try {
                     loginResult = data.getStringExtra("loginResult");
-                    textView.setText(loginResult);
-                    System. out.println("--------"+loginResult);
+                    System. out.println("--------"+( JSON.parseObject( JSON.parseObject(loginResult).getString("response") ) )
+                            .getString("Api-Token") );
+
                     if(JSON.parseObject(loginResult).getString("code") .equals("0000"))
-                        Toast.makeText(this, loginResult, Toast.LENGTH_SHORT).show();
+                    {
+
+                        ApiToken = ( JSON.parseObject( JSON.parseObject(loginResult).getString("response") ) )
+                                .getString("Api-Token");
+                        Toast.makeText(this, ApiToken, Toast.LENGTH_SHORT).show();
+                        FileCacheUtil.setCache(ApiToken,MainActivity.this,"user.txt",1);
+                        new UserThread(userHandler).start();
+                        System.out.println("$$$$$$$$$$$$$$$$$$$$$"+FileCacheUtil.getCache(MainActivity.this,"user.txt"));
+
+                    }
                     else
                         Toast.makeText(this, "登录失败"+loginResult, Toast.LENGTH_SHORT).show();
                     //button.setVisibility(View.INVISIBLE);
                 } catch (Exception e) {
-                    textView.setText("登录失败"+e.toString());
+                    Toast.makeText(this, "登录失败"+loginResult, Toast.LENGTH_SHORT).show();
                 }
                 break;
             default:
@@ -244,7 +303,10 @@ public class MainActivity extends Activity {
                         String code = JSON.parseObject(borrowResult).getString("code");
                         Log.i(TAG,"456"+code);
                         if(code.equals("0000"))
-                            Toast.makeText(this, borrowResult+"借阅成功", Toast.LENGTH_SHORT).show();
+                        {
+                            Toast.makeText(this, borrowResult + "借阅成功", Toast.LENGTH_SHORT).show();
+                            new UserThread(userHandler).start();
+                        }
                         else
                             Toast.makeText(this, borrowResult+"借阅失败", Toast.LENGTH_SHORT).show();
 
@@ -260,6 +322,7 @@ public class MainActivity extends Activity {
 
         super.onActivityResult(requestCode, resultCode, data);
     }
+
 
     public class BookAdapter extends BaseAdapter {
         private List<Book> books;
@@ -358,8 +421,8 @@ public class MainActivity extends Activity {
                 public void onClick(View v) {
                     Intent singleLogIntent = new Intent(MainActivity.this,SingleLog.class);
                     Bundle singleLogBundle = new Bundle();
-                    singleLogBundle.putString("logListTitle",logLists.get(position+1).getTitle());
-                    singleLogBundle.putString("logListBody",logLists.get(position+1).getBody());
+                    singleLogBundle.putString("logListTitle",logLists.get(position).getTitle());
+                    singleLogBundle.putString("logListBody",logLists.get(position).getBody());
                     singleLogIntent.putExtras(singleLogBundle);
                     startActivity(singleLogIntent);
                 }

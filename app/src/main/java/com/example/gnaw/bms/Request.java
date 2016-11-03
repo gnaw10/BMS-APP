@@ -21,13 +21,13 @@ public class Request {
     public void setCode(String code) {
         this.code = code;
     }
-
     public List<Book> getResponse() {
         return response;
     }
     public void setResponse(List<Book> response) {
         this.response = response;
     }
+
     @Override
     public String toString() {
         return "Request [ code=" +code + ", response=" + response + "]";

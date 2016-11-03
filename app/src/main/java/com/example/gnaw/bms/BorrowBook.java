@@ -102,7 +102,7 @@ public class BorrowBook extends Activity {
                         "\t\"bid\":"+num+"\n" +
                         "}\n";
 
-                Log.i(CHILD_TAG,"asdasd"+para);
+                Log.i(CHILD_TAG,"asdasd" + para);
                 //1.得到HttpURLConnection实例化对象
                 conn = (HttpURLConnection) url.openConnection();
                 //2.设置请求方式
@@ -116,7 +116,7 @@ public class BorrowBook extends Activity {
          * servlet就可以直接使用request.getParameter("username");直接得到所需要信息
 */
                 conn.setRequestProperty("Content-Type", "application/json");
-                conn.setRequestProperty("Api-Token","admin-123456789-1");
+                conn.setRequestProperty("Api-Token",MainActivity.ApiToken);
 
                 conn.setRequestProperty("Content-Length", String.valueOf(para.getBytes().length));
                 //默认为false

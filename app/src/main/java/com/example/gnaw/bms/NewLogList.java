@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.alibaba.fastjson.JSON;
 
@@ -19,37 +20,53 @@ import java.net.URL;
 import java.util.Scanner;
 
 /**
- * Created by gnaw on 2016/10/31.
+ * Created by gnaw on 2016/11/3.
  */
 
-public class UserLogin extends Activity {
+public class NewLogList extends Activity {
 
-    private Button signButton = null;
-    private User user = new User();
+    private Button logListSubmit;
+    private EditText textLogListBody,textLogListTitle,textLogListNum;
     private static String result;
+    private NewLogListClass newLogList = new NewLogListClass();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.userlogin);
-        signButton=(Button)findViewById(R.id.signButton);
+        setContentView(R.layout.newloglist);
+
+        logListSubmit = (Button) findViewById(R.id.logListSubmit);
+        textLogListBody = (EditText) findViewById(R.id.textLogListBody);
+        textLogListNum = (EditText) findViewById(R.id.textLogListNum);
+        textLogListTitle = (EditText) findViewById(R.id.textLogListTitle);
 
         // 创建一个新线程，用外部处理程序初始化，便于将线程的数据送回
-        final MyThread thread = new MyThread(handler);
+        //final UserLogin.MyThread thread = new UserLogin.MyThread(handler);
         // 开始新线程
 
         //thread.start();
-        signButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                user.setPassword(((EditText)findViewById(R.id.editBookNum)).getText().toString());
-                user.setUsername(((EditText)findViewById(R.id.editUsername)).getText().toString());
-                new MyThread(handler).start();
-            }
-        });
+        if (MainActivity.nowUserId > 0) {
+            logListSubmit.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    try {
+
+
+                        newLogList.setTitle(textLogListTitle.getText().toString());
+                        newLogList.setBody(textLogListBody.getText().toString());
+                        newLogList.setBid(Integer.parseInt(textLogListNum.getText().toString()));
+                        new MyThread(handler).start();
+                    }
+                    catch (Exception e)
+                    {
+                        Log.i("asd",e.toString());
+                    }
+                }
+            });
+        }
     }
 
     Handler handler = new Handler() {
-
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
@@ -58,9 +75,6 @@ public class UserLogin extends Activity {
             // 将线程中的得到的数据显示
             try
             {
-                Intent retIt=getIntent();
-                retIt.putExtra("loginResult",result);
-                setResult(Activity.RESULT_OK,retIt);
                 finish();
             }
             catch (Exception e)
@@ -86,9 +100,9 @@ public class UserLogin extends Activity {
             Looper.prepare();
             HttpURLConnection conn = null;
             try {
-                URL url = new URL("http://book.gnaw10.cn/user/signin");
-                Log.i(CHILD_TAG,user.toString());
-                String passage= JSON.toJSONString(user);
+                URL url = new URL("http://book.gnaw10.cn/log/new");
+
+                String passage= JSON.toJSONString(newLogList);
                 Log.i(CHILD_TAG,passage);
 
                 String para = passage;
@@ -105,6 +119,7 @@ public class UserLogin extends Activity {
          * servlet就可以直接使用request.getParameter("username");直接得到所需要信息
 */
                 conn.setRequestProperty("Content-Type", "application/json");
+                conn.setRequestProperty("Api-Token", MainActivity.ApiToken);
                 conn.setRequestProperty("Content-Length", String.valueOf(para.getBytes().length));
                 //默认为false
                 conn.setDoOutput(true);

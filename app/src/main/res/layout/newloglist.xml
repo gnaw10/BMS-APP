@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:weightSum="1">
+
+
+        <EditText
+        android:hint="Title"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:id="@+id/textLogListTitle" />
+
+    <EditText
+            android:layout_width="match_parent"
+            android:layout_height="49dp"
+            android:id="@+id/textLogListNum"
+            android:hint="相关书籍编号"
+            android:fontFamily="sans-serif"
+             android:inputType="number" />
+
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="text"
+        android:hint="body"
+        android:ems="10"
+        android:id="@+id/textLogListBody"
+        android:layout_weight="0.88" />
+
+    <Button
+        android:text="Button"
+        android:layout_width="202dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/logListSubmit" />
+</LinearLayout>
