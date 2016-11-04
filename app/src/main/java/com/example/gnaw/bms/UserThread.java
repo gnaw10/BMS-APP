@@ -70,6 +70,7 @@ public class UserThread extends Thread {
                     String tempResponse = userRequest.getString("response");
                     System.out.println(tempResponse);
                     MainActivity.bookNum = Integer.parseInt( (JSON.parseObject(tempResponse)).getString("bookNum"));
+                    MainActivity.roleId = Integer.parseInt( (JSON.parseObject(tempResponse)).getString("roleId"));
                     Log.i("asd","asdasdasd"+MainActivity.bookNum);
                     System.out.println(result);
 

@@ -9,7 +9,10 @@ import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.RadioGroup;
+import android.widget.Switch;
 
 import com.alibaba.fastjson.JSON;
 
@@ -19,33 +22,50 @@ import java.net.URL;
 import java.util.Scanner;
 
 /**
- * Created by gnaw on 2016/10/31.
+ * Created by gnaw on 2016/11/4.
  */
 
-public class UserLogin extends Activity {
+public class Register extends Activity {
 
-    private Button signButton = null;
-    private User user = new User();
+    private Button registerButton = null;
     private static String result;
+    public int gender=0;
+    private RegisterRequest registerRequest = new RegisterRequest();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.userlogin);
-        signButton=(Button)findViewById(R.id.signButton);
+        setContentView(R.layout.register);
 
+        registerButton=(Button)findViewById(R.id.registerButton);
+        ((Switch)findViewById(R.id.switchRegisterGender)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView,
+                                         boolean isChecked) {
+                if (isChecked) {
+                    gender = 0;
+                } else {
+                    gender = 1;
+                }
+            }
+        });
         // 创建一个新线程，用外部处理程序初始化，便于将线程的数据送回
-        final MyThread thread = new MyThread(handler);
+        //final MyThread thread = new MyThread(handler);
         // 开始新线程
 
         //thread.start();
-        signButton.setOnClickListener(new View.OnClickListener() {
+        registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                user.setPassword(((EditText)findViewById(R.id.editRegisterEmail)).getText().toString());
-                user.setUsername(((EditText)findViewById(R.id.editRegisterUsername)).getText().toString());
+                Log.i("sadasdasdasdasdas", ((Switch)findViewById(R.id.switchRegisterGender)).getText().toString() );
+
+                registerRequest.setUsername( ((EditText)findViewById(R.id.editRegisterUsername)).getText().toString());
+                registerRequest.setPassword( ((EditText)findViewById(R.id.editRegisterPassword)).getText().toString());
+                registerRequest.setEmail( ((EditText)findViewById(R.id.editRegisterEmail)).getText().toString());
+                registerRequest.setPhone( ((EditText)findViewById(R.id.editRegisterPhone)).getText().toString());
+                registerRequest.setGender(gender);
                 new MyThread(handler).start();
             }
-        });
+    });
     }
 
     Handler handler = new Handler() {
@@ -86,11 +106,10 @@ public class UserLogin extends Activity {
             Looper.prepare();
             HttpURLConnection conn = null;
             try {
-                URL url = new URL("http://book.gnaw10.cn/user/signin");
-                Log.i(CHILD_TAG,user.toString());
-                String passage= JSON.toJSONString(user);
+                URL url = new URL("http://book.gnaw10.cn/user/signup");
+                Log.i(CHILD_TAG, JSON.toJSONString(registerRequest));
+                String passage= JSON.toJSONString(registerRequest);
                 Log.i(CHILD_TAG,passage);
-
                 String para = passage;
                 Log.i(CHILD_TAG,"asdasd"+para);
                 //1.得到HttpURLConnection实例化对象
@@ -110,7 +129,6 @@ public class UserLogin extends Activity {
                 conn.setDoOutput(true);
                 //4.向服务器写入数据
                 conn.getOutputStream().write(para.getBytes());
-                System.out.println(para);
                 //5.得到服务器相应
                 if (conn.getResponseCode() == 200) {
                     Log.i("-----",passage);
@@ -118,7 +136,7 @@ public class UserLogin extends Activity {
                     InputStream is = conn.getInputStream();
                     Scanner scanner = new Scanner(is, "UTF-8");
                     result = scanner.useDelimiter("\\A").next();
-
+                    System.out.println("---0"+result);
                     scanner.close();
                 } else {
                     System.out.println("请求失败！");

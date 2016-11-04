@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:weightSum="1">
+
+    <EditText
+        android:layout_width="260dp"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:layout_gravity="center_horizontal"
+        android:ems="10"
+        android:id="@+id/editLoanBookId"
+        android:hint="BookId" />
+
+    <Button
+        android:text="Button"
+        android:layout_width="189dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_height="wrap_content"
+        android:id="@+id/loanButton"
+        android:layout_weight="0.02" />
+</LinearLayout>

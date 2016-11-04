@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.PagerAdapter;
@@ -14,7 +13,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -23,15 +21,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 
-import java.io.File;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 
 public class MainActivity extends Activity {
@@ -43,7 +35,7 @@ public class MainActivity extends Activity {
     private TextView textView;
     private static final String TAG = "MainActivity";
     public static Handler mMainHandler, mChildHandler;
-    private Button bookButton, button,logListButton,newLogListButton;
+    private Button bookButton, loginButton,logListButton,newLogListButton,logoutButton,registerButton,loanButton;
     private ListView listView,logListView;
     private Book book = new Book();
     public static Intent intent = new Intent();
@@ -52,7 +44,7 @@ public class MainActivity extends Activity {
     private  List<Book> books = new ArrayList<Book>();
     private  List<LogList> logLists = new ArrayList<LogList>();
     public static String ApiToken,username;
-    public static int bookNum,nowUserId = 0;
+    public static int bookNum,nowUserId = 0,roleId = 0;
     private EditText editUsername,editBookNum;
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -79,11 +71,14 @@ public class MainActivity extends Activity {
         logListView = (ListView) view2.findViewById(R.id.logListView);
 
         final View view3 = mInflater.inflate(R.layout.layout3, null);
-        editBookNum = (EditText) view3.findViewById(R.id.editBookNum);
-        editUsername = (EditText) view3.findViewById(R.id.editUsername);
+        editBookNum = (EditText) view3.findViewById(R.id.editRegisterEmail);
+        editUsername = (EditText) view3.findViewById(R.id.editRegisterUsername);
+        loanButton = (Button) view3.findViewById(R.id.loanButton);
         editBookNum.setText("0");
         editBookNum.setEnabled(false);
         editUsername.setEnabled(false);
+
+
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         tabLayout = (TabLayout) findViewById(R.id.tabLayout);
         newLogListButton = (Button)view2.findViewById(R.id.newLogListButton);
@@ -92,8 +87,10 @@ public class MainActivity extends Activity {
         //view1 = inflater.inflate(R.layout.layout1, null);
         //view2 = inflater.inflate(R.layout.layout2, null);
         //view3 = inflater.inflate(R.layout.layout3, null);
-        button = (Button) view3.findViewById(R.id.button);
-
+        loginButton = (Button) view3.findViewById(R.id.loginButton);
+        logoutButton = (Button) view3.findViewById(R.id.logoutButton);
+        registerButton = (Button) view3.findViewById(R.id.registerButton);
+        loanButton.setVisibility(View.INVISIBLE);
         ApiToken = FileCacheUtil.getCache(MainActivity.this,"user.txt");
         if(ApiToken.length()>9)
             MainActivity.nowUserId =Integer.parseInt(ApiToken.substring(ApiToken.lastIndexOf("-")+1,ApiToken.length()));
@@ -164,7 +161,7 @@ public class MainActivity extends Activity {
             }
         });
 
-        button.setOnClickListener(new View.OnClickListener() {
+        loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //button.setVisibility(View.GONE);
@@ -173,10 +170,43 @@ public class MainActivity extends Activity {
             }
         });
 
+        registerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //button.setVisibility(View.GONE);
+                Intent registerIntent = new Intent(MainActivity.this, Register.class);
+                startActivityForResult(registerIntent, 3);
+            }
+        });
+
+        logoutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FileCacheUtil.setCache(" ",MainActivity.this,"user.txt",3);
+                ApiToken = FileCacheUtil.getCache(MainActivity.this,"user.txt");
+                loanButton.setVisibility(View.INVISIBLE);
+                //new UserThread(userHandler).start();
+                editBookNum.setText("");
+                editUsername.setText("");
+                editBookNum.setHint("Null");
+                editUsername.setHint("0");
+            }
+        });
+
+
+
         logListButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 new LogListThread(logListHandler).start();
+            }
+        });
+
+        loanButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent loanIntent = new Intent(MainActivity.this,Loan.class);
+                startActivity(loanIntent);
             }
         });
 
@@ -245,11 +275,21 @@ public class MainActivity extends Activity {
             try
             {
 
+                FileCacheUtil.setCache(Integer.toString(roleId),MainActivity.this,"role.txt",3);
+
+                Log.i("^^^^^^^^^^^^^^^^^","roleID:"+roleId);
+                if(roleId ==1 || roleId ==2)
+                {
+                    loanButton.setVisibility(View.VISIBLE);
+                }
+                else
+                {
+                    loanButton.setVisibility(View.INVISIBLE);
+                }
                 editUsername.setText(username);
                 editBookNum.setText(Integer.toString(bookNum));
                 editBookNum.setEnabled(false);
                 editUsername.setEnabled(false);
-
 
             }
             catch (Exception e)
@@ -262,19 +302,18 @@ public class MainActivity extends Activity {
     public Handler handler = new  Handler();
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        String loginResult="1",borrowResult="2";
+        String loginResult="1",borrowResult="2",registerResult = "3";
         Log.i(TAG,"/"+resultCode+"/"+requestCode);
         if(requestCode == 1)
         switch (resultCode) {
             case RESULT_OK:
                 try {
                     loginResult = data.getStringExtra("loginResult");
+                    System.out.println(loginResult);
                     System. out.println("--------"+( JSON.parseObject( JSON.parseObject(loginResult).getString("response") ) )
                             .getString("Api-Token") );
-
                     if(JSON.parseObject(loginResult).getString("code") .equals("0000"))
                     {
-
                         ApiToken = ( JSON.parseObject( JSON.parseObject(loginResult).getString("response") ) )
                                 .getString("Api-Token");
                         Toast.makeText(this, ApiToken, Toast.LENGTH_SHORT).show();
@@ -319,6 +358,32 @@ public class MainActivity extends Activity {
                 default:
                     break;
             }
+        else if(requestCode == 3)
+            switch (resultCode) {
+                case RESULT_OK:
+                    try {
+                        registerResult = data.getStringExtra("registerResult");
+                        //textView.setText(borrowResult);
+                        Log.i(TAG,"123"+borrowResult);
+                        String code = JSON.parseObject(borrowResult).getString("code");
+                        Log.i(TAG,"456"+code);
+                        if(code.equals("0000"))
+                        {
+                            Toast.makeText(this, borrowResult + "注册成功", Toast.LENGTH_SHORT).show();
+                            new UserThread(userHandler).start();
+                        }
+                        else
+                            Toast.makeText(this, borrowResult+"注册失败", Toast.LENGTH_SHORT).show();
+
+                        //button.setVisibility(View.INVISIBLE);
+                    } catch (Exception e) {
+                        //textView.setText("登录失败"+e.toString());
+                        Toast.makeText(this, borrowResult+"注册失败", Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+                default:
+                    break;
+            }
 
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -351,6 +416,7 @@ public class MainActivity extends Activity {
         public View getView(final int position, View convertView, ViewGroup parent) {
             final int num = position;
             Book book = books.get(position);
+            final String cover = book.getCoverUrl();
             View v = convertView;
             if(convertView == null)
             {
@@ -369,6 +435,8 @@ public class MainActivity extends Activity {
                         Bundle bookBundle;//该类用作携带数据
                         bookBundle = new Bundle();
                         bookBundle.putInt("id", (position+1));
+                        bookBundle.putString("coverUrl",cover);
+
                         borrowIntent.putExtras(bookBundle);
                         startActivityForResult(borrowIntent,2);
                     }

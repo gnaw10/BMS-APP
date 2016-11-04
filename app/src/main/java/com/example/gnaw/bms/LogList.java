@@ -5,8 +5,8 @@ package com.example.gnaw.bms;
  */
 
 public class LogList {
-    private int id,user_id,book_id;
-    private String title,body;
+    private int id,book_id;
+    private String title,body,user_id;
 
 
     public int getId() {
@@ -17,14 +17,13 @@ public class LogList {
         this.id = id;
     }
 
-    public int getUser_id() {
-        return user_id;
-    }
-
-    public void setUser_id(int user_id) {
+    public void setUser_id(String user_id) {
         this.user_id = user_id;
     }
-
+    public String getUser_id()
+    {
+        return user_id;
+    }
     public int getBook_id() {
         return book_id;
     }
@@ -48,10 +47,12 @@ public class LogList {
     public void setBody(String body) {
         this.body = body;
     }
+
     @Override
     public String toString() {
         return "Log [ id=" + id + ", title=" + title + ", body=" + body + ", user_id=" + user_id + ", book_id =" + book_id + "]";
     }
+
 
 }
 /*

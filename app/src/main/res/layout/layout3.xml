@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
@@ -14,32 +15,32 @@
         android:layout_height="wrap_content"
         android:focusable="false"
         android:ems="10"
-        android:layout_below="@+id/editUsername"
-        android:layout_alignLeft="@+id/editUsername"
-        android:layout_alignStart="@+id/editUsername"
-        android:id="@+id/editBookNum"
-        android:text="NULL" />
+        android:layout_below="@+id/editRegisterUsername"
+        android:layout_alignLeft="@+id/editRegisterUsername"
+        android:layout_alignStart="@+id/editRegisterUsername"
+        android:id="@+id/editRegisterEmail"
+        android:hint="NULL" />
 
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:id="@+id/editUsername"
+        android:id="@+id/editRegisterUsername"
         android:layout_marginTop="57dp"
         android:layout_marginRight="31dp"
         android:layout_marginEnd="31dp"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:focusable="false"
-        android:text="NULL" />
+        android:hint="NULL" />
 
     <TextView
         android:text="用户名"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/editBookNum"
-        android:layout_toLeftOf="@+id/editBookNum"
-        android:layout_toStartOf="@+id/editBookNum"
+        android:layout_above="@+id/editRegisterEmail"
+        android:layout_toLeftOf="@+id/editRegisterEmail"
+        android:layout_toStartOf="@+id/editRegisterEmail"
         android:layout_marginRight="14dp"
         android:layout_marginEnd="14dp"
         android:layout_marginBottom="11dp"
@@ -56,13 +57,50 @@
          />
 
     <Button
+        android:text="注册"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="15dp"
+        android:layout_marginEnd="15dp"
+        android:id="@+id/registerButton"
+        android:layout_alignBaseline="@+id/logoutButton"
+        android:layout_alignBottom="@+id/logoutButton"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        android:text="登出"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/logoutButton"
+        android:layout_alignBaseline="@+id/loginButton"
+        android:layout_alignBottom="@+id/loginButton"
+        android:layout_toLeftOf="@+id/registerButton"
+        android:layout_toStartOf="@+id/registerButton"
+        android:layout_marginRight="19dp"
+        android:layout_marginEnd="19dp" />
+
+    <Button
         android:text="登录"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="60dp"
-        android:id="@+id/button"
-        android:layout_below="@+id/editBookNum"
-        android:layout_toRightOf="@+id/textUsername"
-        android:layout_toEndOf="@+id/textUsername" />
+        android:id="@+id/loginButton"
+        android:layout_centerVertical="true"
+        android:layout_toLeftOf="@+id/logoutButton"
+        android:layout_toStartOf="@+id/logoutButton"
+        android:layout_marginRight="18dp"
+        android:layout_marginEnd="18dp" />
+
+    <Button
+        android:text="归还书籍"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/loginButton"
+        android:layout_alignLeft="@+id/loginButton"
+        android:layout_alignStart="@+id/loginButton"
+        android:layout_marginTop="44dp"
+        android:id="@+id/loanButton"
+        android:layout_alignRight="@+id/editRegisterEmail"
+        android:layout_alignEnd="@+id/editRegisterEmail" />
 
 </RelativeLayout>

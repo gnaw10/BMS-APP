@@ -42,11 +42,19 @@ public class BorrowBook extends Activity {
         setContentView(R.layout.borrowbook);
         borrowButton=(Button)findViewById(R.id.borrowButton);
         webView = (WebView) findViewById(R.id.webView);
-        webView.loadUrl("http://pic.58pic.com/58pic/11/16/28/22J58PICIKD.jpg");
+
         Intent tempIntent = getIntent();
         Bundle tempbundle = tempIntent.getExtras();
         Log.i("+++++++","------"+tempbundle.getInt("id"));
         num= tempbundle.getInt("id");
+        try
+        {
+            webView.loadUrl("http://"+tempbundle.getString("coverUrl"));
+        }
+        catch(Exception e)
+        {
+            webView.loadUrl("http://pic.58pic.com/58pic/11/16/28/22J58PICIKD.jpg");
+        }
         borrowButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
