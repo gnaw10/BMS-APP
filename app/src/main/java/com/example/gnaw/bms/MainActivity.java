@@ -206,7 +206,7 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 Intent loanIntent = new Intent(MainActivity.this,Loan.class);
-                startActivity(loanIntent);
+                startActivityForResult(loanIntent,4);
             }
         });
 
@@ -302,7 +302,7 @@ public class MainActivity extends Activity {
     public Handler handler = new  Handler();
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        String loginResult="1",borrowResult="2",registerResult = "3";
+        String loginResult="1",borrowResult="2",registerResult = "3",loanResult ="4";
         Log.i(TAG,"/"+resultCode+"/"+requestCode);
         if(requestCode == 1)
         switch (resultCode) {
@@ -364,21 +364,47 @@ public class MainActivity extends Activity {
                     try {
                         registerResult = data.getStringExtra("registerResult");
                         //textView.setText(borrowResult);
-                        Log.i(TAG,"123"+borrowResult);
-                        String code = JSON.parseObject(borrowResult).getString("code");
+                        //Log.i(TAG,"123"+borrowResult);
+                        String code = JSON.parseObject(registerResult).getString("code");
                         Log.i(TAG,"456"+code);
                         if(code.equals("0000"))
                         {
-                            Toast.makeText(this, borrowResult + "注册成功", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, registerResult + "注册成功", Toast.LENGTH_SHORT).show();
                             new UserThread(userHandler).start();
                         }
                         else
-                            Toast.makeText(this, borrowResult+"注册失败", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, registerResult+"注册失败", Toast.LENGTH_SHORT).show();
 
                         //button.setVisibility(View.INVISIBLE);
                     } catch (Exception e) {
                         //textView.setText("登录失败"+e.toString());
-                        Toast.makeText(this, borrowResult+"注册失败", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, registerResult+"注册失败", Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+                default:
+                    break;
+            }
+        else if(requestCode == 4)
+            switch (resultCode) {
+                case RESULT_OK:
+                    try {
+                        loanResult = data.getStringExtra("loanResult");
+                        //textView.setText(borrowResult);
+                        //Log.i(TAG,"123"+borrowResult);
+                        String code = JSON.parseObject(loanResult).getString("code");
+                        Log.i(TAG,"456"+code);
+                        if(code.equals("0000"))
+                        {
+                            Toast.makeText(this, loanResult + "还书成功", Toast.LENGTH_SHORT).show();
+                            new UserThread(userHandler).start();
+                        }
+                        else
+                            Toast.makeText(this, loanResult+"还书失败", Toast.LENGTH_SHORT).show();
+
+                        //button.setVisibility(View.INVISIBLE);
+                    } catch (Exception e) {
+                        //textView.setText("登录失败"+e.toString());
+                        Toast.makeText(this, borrowResult+"还书失败", Toast.LENGTH_SHORT).show();
                     }
                     break;
                 default:

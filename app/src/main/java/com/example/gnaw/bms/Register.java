@@ -79,7 +79,7 @@ public class Register extends Activity {
             try
             {
                 Intent retIt=getIntent();
-                retIt.putExtra("loginResult",result);
+                retIt.putExtra("registerResult",result);
                 setResult(Activity.RESULT_OK,retIt);
                 finish();
             }

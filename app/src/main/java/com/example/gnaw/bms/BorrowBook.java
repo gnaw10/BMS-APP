@@ -13,6 +13,7 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -42,7 +43,13 @@ public class BorrowBook extends Activity {
         setContentView(R.layout.borrowbook);
         borrowButton=(Button)findViewById(R.id.borrowButton);
         webView = (WebView) findViewById(R.id.webView);
-
+        webView.setWebViewClient(new WebViewClient(){
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                view.loadUrl(url);
+                return true;
+            }
+        });
         Intent tempIntent = getIntent();
         Bundle tempbundle = tempIntent.getExtras();
         Log.i("+++++++","------"+tempbundle.getInt("id"));

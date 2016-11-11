@@ -30,7 +30,7 @@
         android:layout_weight="0.88" />
 
     <Button
-        android:text="Button"
+        android:text="提交"
         android:layout_width="202dp"
         android:layout_height="wrap_content"
         android:id="@+id/logListSubmit" />

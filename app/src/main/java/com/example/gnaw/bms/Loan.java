@@ -62,7 +62,9 @@ public class Loan extends Activity {
             // 将线程中的得到的数据显示
             try
             {
-
+                Intent retIt=getIntent();
+                retIt.putExtra("loanResult",result);
+                setResult(Activity.RESULT_OK,retIt);
                 finish();
             }
             catch (Exception e)
